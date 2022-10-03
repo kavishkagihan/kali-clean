@@ -4,14 +4,14 @@ ZSH_THEME="robbyrussell"
 #ZSH_THEME="gozilla"
 plugins=(git)
 
+export TMUX_CONFIG="~/.config/tmux/tmux.conf"
+TMUX_SATUS_BAR=~/.config/tmux/TMUX_SATUS_BAR
+
 source $ZSH/oh-my-zsh.sh
 export PATH=/home/kavi/.local/bin:$PATH
 
 alias ll='ls -alhF'
 alias c='xclip -selection clipboard'
-
-p() {
-}
 
 server() {
 	if [[ $2 ]];then
@@ -31,15 +31,24 @@ vpn-up() {
 }
 
 htb-init() {
-	mkdir -p /home/kavi/Documents/HTB/$1/files
-	mkdir -p /home/kavi/Documents/HTB/$1/exploits
-	cd /opt/drop
-	/usr/bin/python3 -m http.server 8080 > /dev/null 2>&1 &
-	echo $! > /home/kavi/Documents/HTB/$1/.server.pid
-	echo "export IP=$2" >> ~/.zshrc
-	/usr/bin/zsh
-	cd /home/kavi/Documents/HTB/$1
+	if [[ $1 ]]; then			
+		mkdir -p /home/kavi/Documents/HTB/$1/files
+		mkdir -p /home/kavi/Documents/HTB/$1/exploits
+		cd /opt/drop
+		/usr/bin/python3 -m http.server 8080 > /dev/null 2>&1 &
+		echo $! > /home/kavi/Documents/HTB/$1/.server.pid
+		cd /home/kavi/Documents/HTB/$1
+		clear
+	else
+		echo 'Usage: htb-init Moderators'
+	fi
 }
+
+
+htb-setup() {
+	/home/kavi/Documents/scripts/htb-setup.sh
+}
+
 
 nmap-full() {
 	nmap -p- -sC -sV -A --min-rate=400 --min-parallelism=512 -vv $1
@@ -86,4 +95,18 @@ urldecode() {
 
 md5() {
 	python3 -c 'import hashlib,sys; print(hashlib.md5(sys.stdin.read().encode()).hexdigest())'
+}
+
+##### TMUX options
+
+tsa() {
+	status_bar=$(cat $TMUX_SATUS_BAR)
+	tmux set-option -g status-right "$1 $status_bar"
+	echo "$1 $status_bar" > $TMUX_SATUS_BAR
+}
+
+tsd() {
+	echo '[#{session_name}]' > $TMUX_SATUS_BAR
+	status_bar=$(cat $TMUX_SATUS_BAR)
+	tmux set-option -g status-right "$status_bar"
 }
